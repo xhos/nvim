@@ -212,6 +212,10 @@ vim.keymap.set('n', '<leader>to', '<cmd>tabonly<CR>', { desc = '[T]ab [O]nly' })
 vim.keymap.set('n', 'gt', '<cmd>tabnext<CR>', { desc = 'Next tab' })
 vim.keymap.set('n', 'gT', '<cmd>tabprevious<CR>', { desc = 'Previous tab' })
 
+-- File tree keybinds
+vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle [E]xplorer' })
+vim.keymap.set('n', '<leader>E', '<cmd>Neotree reveal<CR>', { desc = 'Reveal current file in [E]xplorer' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
@@ -697,7 +701,7 @@ require('lazy').setup({
         -- ts_ls = {},
         --
         nixd = {
-          cmd = { "nixd" },
+          cmd = { 'nixd' },
         },
 
         lua_ls = {
@@ -731,7 +735,9 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       -- Remove nixd from ensure_installed since it's not available in Mason
-      ensure_installed = vim.tbl_filter(function(name) return name ~= 'nixd' end, ensure_installed)
+      ensure_installed = vim.tbl_filter(function(name)
+        return name ~= 'nixd'
+      end, ensure_installed)
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
       })
@@ -913,7 +919,11 @@ require('lazy').setup({
       require('tokyonight').setup {
         styles = {
           comments = { italic = false }, -- Disable italics in comments
+          sidebars = 'dark',
         },
+        on_colors = function(colors)
+          colors.bg_sidebar = '#1e2030'
+        end,
       }
 
       -- Load the colorscheme here.
@@ -931,6 +941,12 @@ require('lazy').setup({
 
   -- Comment/uncomment lines
   { 'numToStr/Comment.nvim', opts = {} },
+
+  -- Anyline - animated indent guides
+  {
+    'huy-hng/anyline.nvim',
+    opts = {},
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -1008,7 +1024,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
