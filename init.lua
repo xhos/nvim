@@ -216,6 +216,37 @@ vim.keymap.set('n', 'gT', '<cmd>tabprevious<CR>', { desc = 'Previous tab' })
 vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle [E]xplorer' })
 vim.keymap.set('n', '<leader>E', '<cmd>Neotree reveal<CR>', { desc = 'Reveal current file in [E]xplorer' })
 
+-- Quick save
+vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { desc = '[W]rite/Save file' })
+vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', { desc = 'Save file' })
+
+-- Autosave on focus lost and buffer leave
+vim.api.nvim_create_autocmd({'FocusLost', 'BufLeave'}, {
+  callback = function()
+    if vim.bo.modified and vim.bo.buftype == '' and vim.fn.expand('%') ~= '' then
+      vim.cmd('silent! w')
+    end
+  end,
+})
+
+-- Transparency toggle
+vim.keymap.set('n', '<leader>tt', function()
+  local transparent = vim.g.transparent_enabled or false
+  if not transparent then
+    vim.cmd('highlight Normal guibg=NONE ctermbg=NONE')
+    vim.cmd('highlight NormalNC guibg=NONE ctermbg=NONE')
+    vim.cmd('highlight SignColumn guibg=NONE ctermbg=NONE')
+    vim.cmd('highlight NeoTreeNormal guibg=NONE ctermbg=NONE')
+    vim.cmd('highlight NeoTreeNormalNC guibg=NONE ctermbg=NONE')
+    vim.g.transparent_enabled = true
+    print("Transparency enabled")
+  else
+    vim.cmd('colorscheme tokyonight-night')  -- Reset colorscheme
+    vim.g.transparent_enabled = false
+    print("Transparency disabled")
+  end
+end, { desc = '[T]oggle [T]ransparency' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
@@ -702,6 +733,13 @@ require('lazy').setup({
         --
         nixd = {
           cmd = { 'nixd' },
+          settings = {
+            nixd = {
+              formatting = {
+                command = { 'alejandra' }
+              }
+            }
+          }
         },
 
         lua_ls = {
@@ -942,11 +980,14 @@ require('lazy').setup({
   -- Comment/uncomment lines
   { 'numToStr/Comment.nvim', opts = {} },
 
+  -- Discord Rich Presence
+  { 'vyfor/cord.nvim', opts = {} },
+
   -- Anyline - animated indent guides
-  {
-    'huy-hng/anyline.nvim',
-    opts = {},
-  },
+  -- {
+  --   'huy-hng/anyline.nvim',
+  --   opts = {},
+  -- },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -1021,7 +1062,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',

@@ -24,5 +24,23 @@ return {
         },
       },
     },
+    default_component_configs = {
+      container = {
+        enable_character_fade = true,
+      },
+      name = {
+        trailing_slash = false,
+        use_git_status_colors = true,
+        highlight = "NeoTreeFileName",
+      },
+    },
+    window = {
+      position = "left",
+      width = 25,
+      mapping_options = {
+        noremap = true,
+        nowait = true,
+      },
+    },
   },
 }
