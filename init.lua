@@ -229,10 +229,15 @@ vim.api.nvim_create_autocmd({'FocusLost', 'BufLeave'}, {
   end,
 })
 
--- Transparency toggle
+
+-- Transparency toggle (now makes opaque when transparent is default)
 vim.keymap.set('n', '<leader>tt', function()
   local transparent = vim.g.transparent_enabled or false
-  if not transparent then
+  if transparent then
+    vim.cmd('colorscheme tokyonight-night')  -- Reset colorscheme to opaque
+    vim.g.transparent_enabled = false
+    print("Transparency disabled (opaque)")
+  else
     vim.cmd('highlight Normal guibg=NONE ctermbg=NONE')
     vim.cmd('highlight NormalNC guibg=NONE ctermbg=NONE')
     vim.cmd('highlight SignColumn guibg=NONE ctermbg=NONE')
@@ -240,10 +245,6 @@ vim.keymap.set('n', '<leader>tt', function()
     vim.cmd('highlight NeoTreeNormalNC guibg=NONE ctermbg=NONE')
     vim.g.transparent_enabled = true
     print("Transparency enabled")
-  else
-    vim.cmd('colorscheme tokyonight-night')  -- Reset colorscheme
-    vim.g.transparent_enabled = false
-    print("Transparency disabled")
   end
 end, { desc = '[T]oggle [T]ransparency' })
 
@@ -296,6 +297,54 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+
+  {
+    'goolord/alpha-nvim',
+    config = function()
+      local alpha = require('alpha')
+      local dashboard = require('alpha.themes.dashboard')
+
+      local function get_random_header()
+        local ascii_dir = vim.fn.stdpath('config') .. '/ascii'
+        local files = vim.fn.glob(ascii_dir .. '/*.lua', 0, 1)
+        
+        if #files == 0 then
+          return nil
+        end
+        
+        local random_file = files[math.random(#files)]
+        local success, header_data = pcall(dofile, random_file)
+        
+        if success and header_data then
+          return header_data
+        else
+          return nil
+        end
+      end
+
+      local header = get_random_header()
+      if header then
+        dashboard.config.layout[1] = header
+      else
+        dashboard.section.header.val = { "No ASCII art found" }
+        dashboard.config.layout[1] = dashboard.section.header
+      end
+
+      dashboard.section.buttons.val = {
+        dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
+        dashboard.button("f", "  Find file", ":Telescope find_files<CR>"),
+        dashboard.button("r", "  Recent", ":Telescope oldfiles<CR>"),
+        dashboard.button("s", "  Settings", ":e $MYVIMRC<CR>"),
+        dashboard.button("q", "  Quit", ":qa<CR>"),
+      }
+
+      dashboard.config.layout[2] = { type = "padding", val = 2 }
+      dashboard.config.layout[3] = dashboard.section.buttons
+
+      alpha.setup(dashboard.config)
+    end,
+    dependencies = { 'nvim-tree/nvim-web-devicons' }
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -968,6 +1017,14 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+      
+      -- Apply transparency after colorscheme loads
+      vim.g.transparent_enabled = true
+      vim.cmd('highlight Normal guibg=NONE ctermbg=NONE')
+      vim.cmd('highlight NormalNC guibg=NONE ctermbg=NONE')
+      vim.cmd('highlight SignColumn guibg=NONE ctermbg=NONE')
+      vim.cmd('highlight NeoTreeNormal guibg=NONE ctermbg=NONE')
+      vim.cmd('highlight NeoTreeNormalNC guibg=NONE ctermbg=NONE')
     end,
   },
 
@@ -1029,21 +1086,22 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+    config = function()
+      local status_ok, configs = pcall(require, 'nvim-treesitter.configs')
+      if not status_ok then
+        return
+      end
+      
+      configs.setup({
+        ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+        auto_install = true,
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = { 'ruby' },
+        },
+        indent = { enable = true, disable = { 'ruby' } },
+      })
+    end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
