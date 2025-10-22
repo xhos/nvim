@@ -1,28 +1,25 @@
 return {
-  'folke/tokyonight.nvim',
+  'datsfilipe/min-theme.nvim',
   priority = 1000,
   config = function()
-    require('tokyonight').setup {
-      styles = {
-        comments = { italic = false },
-        sidebars = 'dark',
+    require('min-theme').setup({
+      theme = 'dark',
+      transparent = true,
+      italics = {
+        comments = false,
+        keywords = true,
+        functions = true,
+        strings = true,
+        variables = true,
       },
-      on_colors = function(colors)
-        colors.bg_sidebar = '#1e2030'
-      end,
-    }
+    })
 
-    vim.cmd.colorscheme 'tokyonight-night'
+    vim.cmd.colorscheme('min-theme')
 
-    -- Apply transparency after colorscheme loads
+    -- Apply additional transparency for specific elements
     vim.g.transparent_enabled = true
-    vim.cmd('highlight Normal guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight NormalNC guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight SignColumn guibg=NONE ctermbg=NONE')
     vim.cmd('highlight NeoTreeNormal guibg=NONE ctermbg=NONE')
     vim.cmd('highlight NeoTreeNormalNC guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight StatusLine guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight StatusLineNC guibg=NONE ctermbg=NONE')
     vim.cmd('highlight MiniStatuslineModeNormal guibg=NONE ctermbg=NONE')
     vim.cmd('highlight MiniStatuslineModeOther guibg=NONE ctermbg=NONE')
     vim.cmd('highlight MiniStatuslineDevinfo guibg=NONE ctermbg=NONE')

@@ -56,31 +56,36 @@ vim.api.nvim_create_autocmd({'FocusLost', 'BufLeave'}, {
   end,
 })
 
--- TODO: yeah this is bad.
 -- Transparency toggle
 vim.keymap.set('n', '<leader>tt', function()
-  local transparent = vim.g.transparent_enabled or false
-  if transparent then
-    vim.cmd('colorscheme tokyonight-night')
-    vim.g.transparent_enabled = false
-    print("Transparency disabled (opaque)")
-  else
-    vim.cmd('highlight Normal guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight NormalNC guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight SignColumn guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight NeoTreeNormal guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight NeoTreeNormalNC guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight StatusLine guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight StatusLineNC guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineModeNormal guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineModeOther guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineDevinfo guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineFilename guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineFileinfo guibg=NONE ctermbg=NONE')
-    vim.cmd('highlight MiniStatuslineInactive guibg=NONE ctermbg=NONE')
-    vim.g.transparent_enabled = true
-    print("Transparency enabled")
+  vim.g.transparent_enabled = not vim.g.transparent_enabled
+
+  require('min-theme').setup({
+    theme = 'dark',
+    transparent = vim.g.transparent_enabled,
+    italics = {
+      comments = false,
+      keywords = true,
+      functions = true,
+      strings = true,
+      variables = true,
+    },
+  })
+  vim.cmd.colorscheme('min-theme')
+
+  if vim.g.transparent_enabled then
+    local highlights = {
+      'NeoTreeNormal', 'NeoTreeNormalNC',
+      'MiniStatuslineModeNormal', 'MiniStatuslineModeOther',
+      'MiniStatuslineDevinfo', 'MiniStatuslineFilename',
+      'MiniStatuslineFileinfo', 'MiniStatuslineInactive'
+    }
+    for _, hl in ipairs(highlights) do
+      vim.cmd('highlight ' .. hl .. ' guibg=NONE ctermbg=NONE')
+    end
   end
+
+  print("Transparency " .. (vim.g.transparent_enabled and "enabled" or "disabled (opaque)"))
 end, { desc = '[T]oggle [T]ransparency' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
